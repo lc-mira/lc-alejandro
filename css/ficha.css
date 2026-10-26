@@ -40,10 +40,11 @@
 .ficha-close:hover { background: var(--color-linea); }
 
 /* Swiper */
-.ficha-swiper { width: 100%; aspect-ratio: 16/10; flex-shrink: 0; }
+.ficha-swiper { width: 100%; aspect-ratio: 16/10; flex-shrink: 0; background: #111; }
 .ficha-swiper .swiper-slide img {
-  width: 100%; height: 100%; object-fit: cover;
+  width: 100%; height: 100%; object-fit: contain; /* se ve la foto COMPLETA, no recortada */
 }
+.ficha-swiper .swiper-zoom-container { width: 100%; height: 100%; }
 .ficha-swiper .swiper-button-prev,
 .ficha-swiper .swiper-button-next { color: #fff; }
 .ficha-swiper .swiper-pagination-bullet-active { background: var(--color-primario); }
