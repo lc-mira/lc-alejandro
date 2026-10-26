@@ -7,10 +7,18 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Regla global: cualquier elemento con el atributo HTML "hidden" se oculta
+ * siempre, sin importar qué otras reglas de display tenga su clase. Sin esto,
+ * un elemento como <img class="logo-img" hidden> queda visible igual, porque
+ * "img, video { display: block }" (más abajo) pisa el comportamiento nativo
+ * de "hidden". Esta regla evita ese bug en todo el sitio, de una vez. */
+[hidden] { display: none !important; }
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 64px; /* altura del header fijo */
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden; /* evita scroll horizontal si algún elemento se desborda */
 }
 
 body {
@@ -19,6 +27,7 @@ body {
   line-height: 1.55;
   color: var(--color-tinta);
   background: var(--color-fondo);
+  overflow-x: hidden;
 }
 
 img, video { max-width: 100%; height: auto; display: block; }
