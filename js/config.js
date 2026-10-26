@@ -30,7 +30,7 @@ const CONFIG = {
    * La URL se obtiene en Apps Script → Implementar → Administrar
    * implementaciones → copiar la URL del despliegue activo.
    * ---------------------------------------------------------- */
-  SCRIPT_URL:   'https://script.google.com/macros/s/AKfycbyN6JNkp348we4HwW_NSWaDKqvd4AR3-_6IKclAp3fhIg8lrXc-rawTh5DvbUiSMT2E/exec?t=cadena_01',
+  SCRIPT_URL:   'https://script.google.com/macros/s/AKfycbyN6JNkp348we4HwW_NSWaDKqvd4AR3-_6IKclAp3fhIg8lrXc-rawTh5DvbUiSMT2E/exec',
 
   /* ----------------------------------------------------------
    * TOKEN DE CLIENTE
