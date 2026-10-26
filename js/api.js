@@ -75,13 +75,28 @@ async function cargarInventario() {
     fotos: 'fotos', captacion: 'captacion'
   };
 
+  // Alias para columnas cuyo encabezado real NO empieza con el nombre de la
+  // clave (ej. el encabezado es "# Piso" o "Aplica crédito"), así que el
+  // "startsWith" normal nunca las encuentra y el campo queda vacío.
+  const ALIAS_CLAVES = {
+    piso: ['# piso'],
+    credito: ['aplica credito'],
+  };
+
   const keyIdx = {};
   cabeceras.forEach((h, i) => {
     const n = normTexto(h).trim().replace(/\s+/g, '_');
     Object.keys(MAPA_CLAVES).forEach(clave => {
       if (keyIdx[clave] !== undefined) return;
       const pat = normTexto(MAPA_CLAVES[clave]).replace(/\s+/g, '_');
-      if (n === pat || n.startsWith(pat)) keyIdx[clave] = i;
+      let coincide = n === pat || n.startsWith(pat);
+      if (!coincide && ALIAS_CLAVES[clave]) {
+        coincide = ALIAS_CLAVES[clave].some(alias => {
+          const ap = normTexto(alias).replace(/\s+/g, '_');
+          return n === ap || n.endsWith(ap);
+        });
+      }
+      if (coincide) keyIdx[clave] = i;
     });
   });
 
