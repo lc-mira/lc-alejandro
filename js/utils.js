@@ -7,6 +7,15 @@
 
 'use strict';
 
+/* ---- Parsear dinero con formato colombiano ("$165.000.000 COP" → 165000000) ----
+ * La API de Sheets devuelve los valores ya formateados (FORMATTED_VALUE), así que
+ * parseFloat() directo falla (se detiene en el "$"). Hay que limpiar todo lo que
+ * no sea dígito antes de convertir. */
+function parseMoneda(valor) {
+  const limpio = String(valor || '').replace(/[^\d]/g, '');
+  return limpio ? parseInt(limpio, 10) : 0;
+}
+
 /* ---- Formateo de dinero ---- */
 function formatPrecio(valor) {
   if (!valor || isNaN(valor)) return '';
