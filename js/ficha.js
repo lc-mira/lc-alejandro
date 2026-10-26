@@ -124,6 +124,7 @@ function _abrirMiniLead(inm, precioStr) {
   const modal = document.getElementById('mini-modal');
   document.getElementById('mini-modal-title').textContent = `${inm.tipo} en ${inm.barrio} — ${precioStr}`;
   modal.hidden = false;
+  document.getElementById('mini-modal-overlay').hidden = false;
   document.getElementById('mini-modal-overlay').classList.add('active');
   modal.querySelector('#ml-nombre') && modal.querySelector('#ml-nombre').focus();
   modal.dataset.inm = JSON.stringify(inm);
@@ -131,6 +132,7 @@ function _abrirMiniLead(inm, precioStr) {
 
 function _cerrarMiniLead() {
   document.getElementById('mini-modal').hidden = true;
+  document.getElementById('mini-modal-overlay').hidden = true;
   document.getElementById('mini-modal-overlay').classList.remove('active');
 }
 
