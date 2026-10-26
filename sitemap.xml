@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  sitemap.xml
+  ===========
+  INSTRUCCIÓN: Reemplaza BASE_URL con la URL real del sitio.
+  Durante pruebas: https://otayajavier.github.io/lc-alejandro
+  Con dominio propio: https://catalogo.alejandrocadena.co
+
+  Actualiza <lastmod> cada vez que hagas cambios significativos.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>BASE_URL/</loc>
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>BASE_URL/#calculadora</loc>
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>BASE_URL/#consulta</loc>
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>

@@ -1,0 +1,150 @@
+/**
+ * cards.css — TARJETAS DE INMUEBLE + FILTROS
+ * ============================================
+ * Grid de tarjetas, chips de tipo, barra de filtros.
+ */
+
+/* ---- Barra de filtros ---- */
+.filters-bar { margin-bottom: var(--gap-lg); }
+
+.filters-toggle {
+  display: none; /* desktop: siempre visible */
+  align-items: center; gap: var(--gap-sm);
+  padding: 10px 16px; border-radius: var(--radius-md);
+  background: var(--color-papel); border: 1px solid var(--color-linea);
+  font-weight: 600; font-size: var(--text-sm);
+  margin-bottom: var(--gap-sm);
+}
+.filters-badge {
+  background: var(--color-primario); color: #fff;
+  border-radius: var(--radius-full); font-size: 11px;
+  padding: 1px 7px; font-weight: 700;
+}
+
+.filter-row {
+  display: flex; flex-wrap: wrap; gap: var(--gap-sm); align-items: flex-end;
+  background: var(--color-papel); border: 1px solid var(--color-linea);
+  border-radius: var(--radius-md); padding: var(--gap-md);
+}
+.filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 130px; flex: 1 1 130px; }
+.filter-group--range { min-width: 200px; }
+.filter-group--actions { flex-direction: row; align-items: flex-end; gap: var(--gap-sm); flex: 0 0 auto; min-width: auto; }
+.filter-label { font-size: var(--text-xs); font-weight: 600; color: var(--color-tenue); text-transform: uppercase; letter-spacing: .04em; }
+.filter-select, .filter-input {
+  padding: 8px 10px; border: 1px solid var(--color-linea);
+  border-radius: var(--radius-sm); background: var(--color-papel);
+  font-size: var(--text-sm); color: var(--color-tinta);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.filter-select:focus, .filter-input:focus {
+  outline: none; border-color: var(--color-primario);
+  box-shadow: 0 0 0 3px var(--color-acento);
+}
+.range-inputs { display: flex; align-items: center; gap: 6px; }
+.range-inputs .filter-input { width: 80px; }
+.range-sep { color: var(--color-tenue); font-size: var(--text-sm); }
+
+/* ---- Chips de tipo ---- */
+.type-chips { display: flex; gap: var(--gap-sm); flex-wrap: wrap; margin-bottom: var(--gap-md); }
+.type-chip {
+  padding: 5px 14px; border-radius: var(--radius-full);
+  border: 1px solid var(--color-linea); background: var(--color-papel);
+  font-size: var(--text-sm); color: var(--color-suave); font-weight: 500;
+  cursor: pointer; transition: all var(--transition-fast);
+}
+.type-chip:hover  { border-color: var(--color-primario); color: var(--color-primario); }
+.type-chip[aria-pressed="true"] {
+  background: var(--color-tinta); border-color: var(--color-tinta); color: #fff;
+}
+
+/* ---- Grid de tarjetas ---- */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--gap-md);
+}
+.loading-state { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--color-tenue); }
+.empty-state   { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--color-tenue); }
+.empty-state p { font-size: var(--text-lg); margin-bottom: var(--gap-md); }
+
+/* ---- Tarjeta individual ---- */
+.card {
+  background: var(--color-papel); border-radius: var(--radius-lg);
+  border: 1px solid var(--color-linea); overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  cursor: pointer;
+}
+.card:hover {
+  transform: translateY(-4px); box-shadow: var(--shadow-md);
+  border-color: #c9d0da;
+}
+
+/* Imagen */
+.card-img-wrap { position: relative; aspect-ratio: 4/3; overflow: hidden; background: var(--color-fondo); }
+.card-img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--transition-base); }
+.card:hover .card-img { transform: scale(1.04); }
+.card-no-img {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--gap-sm); color: var(--color-tenue); font-size: var(--text-sm);
+}
+.card-no-img svg { width: 40px; height: 40px; opacity: .4; }
+
+/* Badges sobre la imagen */
+.card-badges {
+  position: absolute; top: var(--gap-sm); left: var(--gap-sm);
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.badge {
+  font-size: 11px; font-weight: 700; padding: 3px 9px;
+  border-radius: var(--radius-full); backdrop-filter: blur(6px);
+}
+.badge--servicio { background: rgba(15,91,79,.85); color: #fff; }
+.badge--credito  { background: rgba(255,255,255,.9); color: var(--color-primario); }
+.badge--nuevo    { background: var(--color-cta); color: #fff; }
+
+/* WhatsApp por tarjeta */
+.card-wa-btn {
+  position: absolute; bottom: var(--gap-sm); right: var(--gap-sm);
+  background: var(--color-whatsapp); color: #fff;
+  border-radius: var(--radius-full); border: none;
+  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-sm); transition: transform var(--transition-fast);
+  opacity: 0;
+}
+.card:hover .card-wa-btn { opacity: 1; }
+.card-wa-btn:hover { transform: scale(1.1); }
+.card-wa-btn svg { width: 18px; height: 18px; }
+
+/* Cuerpo de la tarjeta */
+.card-body { padding: var(--gap-md); flex: 1; display: flex; flex-direction: column; }
+.card-barrio { font-size: var(--text-xs); color: var(--color-tenue); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; margin-bottom: 4px; }
+.card-tipo   { font-size: var(--text-sm); font-weight: 600; color: var(--color-suave); margin-bottom: var(--gap-xs); }
+.card-precio { font-size: var(--text-xl); font-weight: 800; color: var(--color-tinta); margin-bottom: var(--gap-sm); }
+.card-precio-label { font-size: var(--text-xs); color: var(--color-tenue); font-weight: 400; margin-left: 4px; }
+
+/* Specs (iconos) */
+.card-specs {
+  display: flex; flex-wrap: wrap; gap: 6px var(--gap-sm);
+  font-size: var(--text-sm); color: var(--color-suave);
+  border-top: 1px solid var(--color-linea);
+  padding-top: var(--gap-sm); margin-top: auto;
+}
+.spec-item { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.spec-icon { font-size: 14px; }
+
+/* Paginación */
+.pagination { text-align: center; padding: var(--gap-xl) 0 0; }
+.pagination-info { font-size: var(--text-sm); color: var(--color-tenue); margin-top: var(--gap-sm); }
+
+/* ---- Responsive filtros ---- */
+@media (max-width: 768px) {
+  .filters-toggle { display: flex; width: 100%; }
+  .filter-row { display: none; }
+  .filters-panel.open .filter-row { display: flex; }
+  .section--catalogo { padding-top: var(--gap-xl); }
+}
+@media (max-width: 480px) {
+  .cards-grid { grid-template-columns: 1fr; }
+}

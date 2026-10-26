@@ -1,0 +1,9 @@
+# robots.txt
+# INSTRUCCIÓN: Reemplaza BASE_URL con la URL real del sitio.
+# Durante pruebas: https://otayajavier.github.io/lc-alejandro
+# Con dominio propio: https://catalogo.alejandrocadena.co
+
+User-agent: *
+Allow: /
+
+Sitemap: BASE_URL/sitemap.xml

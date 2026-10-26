@@ -1,0 +1,24 @@
+/**
+ * solicitudes.css — TABLERO DE REQUERIMIENTOS
+ */
+.req-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--gap-md); }
+.req-card {
+  background: var(--color-papel); border: 1px solid var(--color-linea);
+  border-radius: var(--radius-lg); padding: var(--gap-lg);
+  transition: box-shadow var(--transition-fast);
+}
+.req-card:hover { box-shadow: var(--shadow-md); }
+.req-card.cerrada { opacity: .6; }
+
+.req-cab { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--gap-sm); margin-bottom: var(--gap-sm); }
+.req-tipo { font-weight: 700; font-size: var(--text-lg); color: var(--color-tinta); }
+.req-presup { font-weight: 800; color: var(--color-primario); font-size: var(--text-lg); }
+.req-det { font-size: var(--text-sm); color: var(--color-suave); margin-bottom: var(--gap-sm); display: grid; gap: 3px; }
+.req-det b { color: var(--color-tinta); font-weight: 600; }
+.req-obs {
+  font-size: var(--text-sm); background: var(--color-fondo);
+  border-radius: var(--radius-sm); padding: var(--gap-sm) var(--gap-md);
+  margin: var(--gap-sm) 0; color: var(--color-suave); line-height: 1.55;
+}
+.req-pago { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-full); background: var(--color-acento); color: var(--color-primario); margin-bottom: var(--gap-sm); }
+.req-acciones { display: flex; gap: var(--gap-sm); margin-top: var(--gap-md); flex-wrap: wrap; }

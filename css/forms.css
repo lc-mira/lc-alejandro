@@ -1,0 +1,80 @@
+/**
+ * forms.css — FORMULARIOS DE CAPTACIÓN DE LEADS
+ * ===============================================
+ * Formulario largo (sección "Ayúdame a encontrar")
+ * y formulario mini del overlay de ficha.
+ */
+
+/* ---- Formulario principal ---- */
+.lead-form { display: flex; flex-direction: column; gap: var(--gap-md); }
+
+.form-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-md);
+}
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group--full { grid-column: 1 / -1; }
+
+.form-label {
+  font-size: var(--text-sm); font-weight: 600;
+  color: rgba(255,255,255,.8); /* en sección oscura */
+}
+/* En sección clara */
+.section--alt .form-label, .mini-modal .form-label { color: var(--color-suave); }
+
+.form-input {
+  padding: 12px 14px;
+  border: 1.5px solid rgba(255,255,255,.2);
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,.08);
+  color: #fff; font-size: var(--text-base);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+  width: 100%;
+}
+.form-input:focus {
+  outline: none;
+  border-color: rgba(255,255,255,.6);
+  background: rgba(255,255,255,.12);
+}
+.form-input::placeholder { color: rgba(255,255,255,.35); }
+
+/* En modal claro */
+.mini-modal .form-input {
+  border-color: var(--color-linea); background: var(--color-papel); color: var(--color-tinta);
+}
+.mini-modal .form-input:focus { border-color: var(--color-primario); box-shadow: 0 0 0 3px var(--color-acento); }
+.mini-modal .form-input::placeholder { color: var(--color-tenue); }
+
+.form-input--textarea { resize: vertical; min-height: 90px; }
+.form-input--error { border-color: var(--color-error) !important; }
+
+/* ---- Radios ---- */
+.radio-group { display: flex; gap: var(--gap-sm); flex-wrap: wrap; }
+.radio-group--inline { gap: var(--gap-xs); }
+.radio-option {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: var(--radius-full);
+  border: 1.5px solid rgba(255,255,255,.2);
+  cursor: pointer; font-size: var(--text-sm); font-weight: 500;
+  transition: all var(--transition-fast);
+}
+.radio-option:hover { border-color: rgba(255,255,255,.5); background: rgba(255,255,255,.07); }
+.radio-option input { display: none; }
+.radio-option:has(input:checked) {
+  background: var(--color-primario); border-color: var(--color-primario); color: #fff;
+}
+/* En modal claro */
+.mini-modal .radio-option { border-color: var(--color-linea); color: var(--color-tinta); }
+.mini-modal .radio-option:hover { border-color: var(--color-primario); background: var(--color-acento); }
+.mini-modal .radio-option:has(input:checked) { background: var(--color-primario); border-color: var(--color-primario); color: #fff; }
+
+.form-disclaimer { font-size: var(--text-xs); color: rgba(255,255,255,.45); text-align: center; margin-top: var(--gap-sm); }
+
+/* ---- Validación visual ---- */
+.form-error-msg { font-size: var(--text-xs); color: #fca5a5; margin-top: 4px; display: none; }
+.form-group.has-error .form-error-msg  { display: block; }
+.form-group.has-error .form-input { border-color: #ef4444; }
+
+/* ---- Responsive ---- */
+@media (max-width: 600px) {
+  .form-row { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <!-- SEO básico — se rellena dinámicamente por js/seo.js -->
+  <title>Catálogo de inmuebles</title>
+  <meta name="description" content="Encuentra apartamentos y casas en venta en Cali." />
+
+  <!-- Open Graph (redes sociales) -->
+  <meta property="og:type"  content="website" />
+  <meta property="og:title" content="Catálogo de inmuebles" />
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Librerías externas -->
+  <!-- Swiper.js — carrusel de fotos en la ficha de detalle -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+
+  <!-- Toastify — notificaciones inline sin alert() -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js" defer></script>
+
+  <!-- CSS modular -->
+  <link rel="stylesheet" href="css/tokens.css"    />  <!-- variables / design tokens  -->
+  <link rel="stylesheet" href="css/base.css"      />  <!-- reset + tipografía global   -->
+  <link rel="stylesheet" href="css/layout.css"    />  <!-- nav, hero, secciones        -->
+  <link rel="stylesheet" href="css/cards.css"     />  <!-- tarjetas de inmueble        -->
+  <link rel="stylesheet" href="css/ficha.css"     />  <!-- overlay ficha de detalle    -->
+  <link rel="stylesheet" href="css/forms.css"     />  <!-- formularios y leads         -->
+  <link rel="stylesheet" href="css/calculadora.css"/> <!-- calculadora hipoteca        -->
+  <link rel="stylesheet" href="css/solicitudes.css"/> <!-- tablero requerimientos      -->
+
+  <!-- Config del cliente (ÚNICO archivo que varía por cliente) -->
+  <script src="js/config.js"></script>
+</head>
+
+<body>
+
+  <!-- ============================================================
+       HEADER / NAVEGACIÓN
+       Permanece fijo en el scroll. Logo + menú de secciones.
+  ============================================================ -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a href="#inicio" class="brand" id="brand-link" aria-label="Inicio">
+        <img id="logo-img" src="" alt="Logo" class="logo-img" hidden />
+        <span id="logo-monogram" class="logo-monogram" aria-hidden="true">AB</span>
+        <span class="brand-name" id="brand-name">Bienes Raíces</span>
+      </a>
+
+      <!-- Menú desktop -->
+      <nav class="main-nav" id="main-nav" aria-label="Secciones principales">
+        <a href="#catalogo"     class="nav-link" data-section="catalogo">Catálogo</a>
+        <a href="#calculadora"  class="nav-link" data-section="calculadora">Calculadora</a>
+        <a href="#solicitudes"  class="nav-link" data-section="solicitudes">Solicitudes</a>
+        <a href="#quienes-somos" class="nav-link" data-section="quienes-somos">Nosotros</a>
+        <a href="#consulta"     class="nav-link nav-link--cta" data-section="consulta">
+          Ayúdame a encontrar
+        </a>
+      </nav>
+
+      <!-- Hamburguesa móvil -->
+      <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Menú móvil (drawer) -->
+  <div class="mobile-drawer" id="mobile-drawer" aria-hidden="true">
+    <nav>
+      <a href="#catalogo"      class="drawer-link" data-section="catalogo">🏠 Catálogo</a>
+      <a href="#calculadora"   class="drawer-link" data-section="calculadora">🧮 Calculadora</a>
+      <a href="#solicitudes"   class="drawer-link" data-section="solicitudes">📋 Solicitudes</a>
+      <a href="#quienes-somos" class="drawer-link" data-section="quienes-somos">👤 Nosotros</a>
+      <a href="#consulta"      class="drawer-link drawer-link--cta" data-section="consulta">
+        ✨ Ayúdame a encontrar
+      </a>
+    </nav>
+  </div>
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+
+  <!-- ============================================================
+       SECCIÓN 1 — HERO / INICIO
+       Primera impresión. CTA claro hacia el catálogo.
+  ============================================================ -->
+  <section id="inicio" class="section section--hero">
+    <div class="hero-content">
+      <p class="hero-eyebrow" id="hero-eyebrow">Inmuebles en <span id="hero-ciudad">Cali</span></p>
+      <h1 class="hero-title" id="hero-title">Encuentra el hogar que buscas</h1>
+      <p class="hero-subtitle" id="hero-subtitle">
+        Conoce nuestro inventario actualizado de apartamentos y casas en venta.
+      </p>
+      <div class="hero-actions">
+        <a href="#catalogo" class="btn btn--primary btn--lg">
+          Ver inmuebles disponibles
+        </a>
+        <a href="#consulta" class="btn btn--ghost btn--lg">
+          Quiero asesoría personalizada
+        </a>
+      </div>
+      <!-- Contador en vivo de propiedades -->
+      <div class="hero-stats" id="hero-stats" aria-live="polite"></div>
+    </div>
+    <div class="hero-visual" id="hero-visual" aria-hidden="true">
+      <!-- Imagen de fondo / ilustración — se inyecta dinámicamente -->
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECCIÓN 2 — CATÁLOGO DE INMUEBLES
+       Filtros + cuadrícula de tarjetas.
+  ============================================================ -->
+  <section id="catalogo" class="section section--catalogo">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2 class="section-title">Inmuebles disponibles</h2>
+        <p class="section-sub" id="catalogo-sub">Cargando inventario…</p>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filters-bar" id="filters-bar">
+        <button class="filters-toggle" id="filters-toggle" aria-expanded="false">
+          <span>Filtros</span>
+          <span class="filters-badge" id="filters-badge" hidden>0</span>
+        </button>
+
+        <div class="filters-panel" id="filters-panel">
+          <div class="filter-row">
+            <!-- Tipo de inmueble -->
+            <div class="filter-group">
+              <label class="filter-label" for="f-tipo">Tipo</label>
+              <select id="f-tipo" class="filter-select">
+                <option value="">Todos</option>
+                <option>Apartamento</option>
+                <option>Casa</option>
+                <option>Lote</option>
+                <option>Local</option>
+                <option>Oficina</option>
+                <option>Bodega</option>
+              </select>
+            </div>
+
+            <!-- Barrio / zona -->
+            <div class="filter-group">
+              <label class="filter-label" for="f-barrio">Barrio / Zona</label>
+              <select id="f-barrio" class="filter-select">
+                <option value="">Todos</option>
+              </select>
+            </div>
+
+            <!-- Negocio -->
+            <div class="filter-group">
+              <label class="filter-label" for="f-negocio">Negocio</label>
+              <select id="f-negocio" class="filter-select">
+                <option value="">Venta y Arriendo</option>
+                <option value="Venta">Solo Venta</option>
+                <option value="Arriendo">Solo Arriendo</option>
+              </select>
+            </div>
+
+            <!-- Precio -->
+            <div class="filter-group filter-group--range">
+              <label class="filter-label">Precio (millones)</label>
+              <div class="range-inputs">
+                <input type="number" id="f-precio-min" class="filter-input" placeholder="Mín" min="0" />
+                <span class="range-sep">–</span>
+                <input type="number" id="f-precio-max" class="filter-input" placeholder="Máx" min="0" />
+              </div>
+            </div>
+
+            <!-- Habitaciones -->
+            <div class="filter-group">
+              <label class="filter-label" for="f-hab">Habitaciones</label>
+              <select id="f-hab" class="filter-select">
+                <option value="">Todas</option>
+                <option value="1">1+</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
+                <option value="4">4+</option>
+              </select>
+            </div>
+
+            <!-- Ordenar -->
+            <div class="filter-group">
+              <label class="filter-label" for="f-orden">Ordenar</label>
+              <select id="f-orden" class="filter-select">
+                <option value="aleatorio">Aleatorio</option>
+                <option value="precio-asc">Precio ↑</option>
+                <option value="precio-desc">Precio ↓</option>
+                <option value="area-desc">Mayor área</option>
+              </select>
+            </div>
+
+            <!-- Acciones -->
+            <div class="filter-group filter-group--actions">
+              <button class="btn btn--sm" id="btn-reset-filtros">Limpiar</button>
+              <button class="btn btn--sm btn--secondary" id="btn-copiar-link">Copiar enlace</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chips de tipos activos -->
+      <div class="type-chips" id="type-chips" aria-label="Filtrar por tipo rápido"></div>
+
+      <!-- Grid de tarjetas -->
+      <div class="cards-grid" id="cards-grid" aria-live="polite" aria-label="Listado de inmuebles">
+        <div class="loading-state" id="loading-state">
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Cargando inmuebles…</p>
+        </div>
+      </div>
+
+      <!-- Paginación / cargar más -->
+      <div class="pagination" id="pagination" hidden>
+        <button class="btn btn--outline" id="btn-cargar-mas">
+          Ver más inmuebles
+        </button>
+        <p class="pagination-info" id="pagination-info"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       OVERLAY — FICHA DE DETALLE
+       Se abre al hacer clic en una tarjeta.
+  ============================================================ -->
+  <div class="ficha-overlay" id="ficha-overlay" hidden role="dialog" aria-modal="true" aria-label="Detalle del inmueble">
+    <div class="ficha-panel">
+      <!-- Cabecera del overlay -->
+      <div class="ficha-header">
+        <button class="ficha-close" id="ficha-close" aria-label="Cerrar">✕</button>
+      </div>
+
+      <!-- Carrusel Swiper -->
+      <div class="swiper ficha-swiper" id="ficha-swiper">
+        <div class="swiper-wrapper" id="swiper-slides"></div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+      </div>
+
+      <!-- Datos del inmueble -->
+      <div class="ficha-body" id="ficha-body">
+        <!-- Se inyecta por js/ficha.js -->
+      </div>
+
+      <!-- CTA principal del overlay -->
+      <div class="ficha-footer">
+        <button class="btn btn--primary btn--block" id="btn-ficha-lead">
+          📩 Quiero conocer este inmueble
+        </button>
+        <a class="btn btn--ghost btn--sm" id="btn-ficha-ext" href="#" target="_blank" rel="noopener">
+          Ver ficha técnica completa →
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECCIÓN 3 — CALCULADORA DE HIPOTECA
+  ============================================================ -->
+  <section id="calculadora" class="section section--alt">
+    <div class="section-inner section-inner--narrow">
+      <div class="section-header">
+        <h2 class="section-title">Calculadora de crédito hipotecario</h2>
+        <p class="section-sub">Estima tu cuota mensual y verifica si cumples los requisitos de ley</p>
+      </div>
+      <!-- El formulario y resultado se renderizan por js/calculadora.js -->
+      <div id="calculadora-widget"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECCIÓN 4 — REQUERIMIENTOS (tablero de solicitudes)
+  ============================================================ -->
+  <section id="solicitudes" class="section">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2 class="section-title">Solicitudes de compradores</h2>
+        <p class="section-sub">
+          Otros clientes están buscando inmueble. ¿Tienes el que necesitan?
+        </p>
+      </div>
+      <div class="req-grid" id="req-grid" aria-live="polite">
+        <!-- Se inyecta por js/solicitudes.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECCIÓN 5 — QUIÉNES SOMOS
+  ============================================================ -->
+  <section id="quienes-somos" class="section section--alt">
+    <div class="section-inner section-inner--narrow">
+      <div class="about-layout">
+        <div class="about-photo-wrap">
+          <img id="agente-foto" src="" alt="Foto del agente" class="about-photo" hidden />
+          <div id="agente-avatar" class="about-avatar" aria-hidden="true">AB</div>
+        </div>
+        <div class="about-text">
+          <h2 class="section-title" id="about-nombre">Bienes Raíces</h2>
+          <p class="about-frase" id="about-frase"></p>
+          <p class="about-body">
+            Somos asesores inmobiliarios especializados en <span id="about-ciudad">Cali</span>.
+            Te acompañamos en todo el proceso: búsqueda, visitas, negociación y cierre.
+          </p>
+          <div class="about-stats" id="about-stats">
+            <!-- Se rellena con datos del inventario -->
+          </div>
+          <a href="#consulta" class="btn btn--primary">Habla con nosotros</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECCIÓN 6 — FORMULARIO "AYÚDAME A ENCONTRAR"
+       Formulario completo de calificación de lead.
+  ============================================================ -->
+  <section id="consulta" class="section section--cta">
+    <div class="section-inner section-inner--narrow">
+      <div class="section-header section-header--light">
+        <h2 class="section-title">¿No encuentras lo que buscas?</h2>
+        <p class="section-sub">Cuéntanos qué necesitas y te ayudamos a encontrarlo</p>
+      </div>
+      <form id="lead-form" class="lead-form" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="lf-nombre">Tu nombre *</label>
+            <input class="form-input" id="lf-nombre" type="text" placeholder="Nombre completo" required autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="lf-wa">WhatsApp *</label>
+            <input class="form-input" id="lf-wa" type="tel" placeholder="300 000 0000" required autocomplete="tel" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="lf-tipo">¿Qué tipo de inmueble?</label>
+            <select class="form-input" id="lf-tipo">
+              <option value="">-- Selecciona --</option>
+              <option>Apartamento</option>
+              <option>Casa</option>
+              <option>Lote</option>
+              <option>Local / Oficina</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="lf-presup">Presupuesto aproximado</label>
+            <select class="form-input" id="lf-presup">
+              <option value="">-- Selecciona --</option>
+              <option>Menos de $150 M</option>
+              <option>$150 M – $250 M</option>
+              <option>$250 M – $400 M</option>
+              <option>$400 M – $600 M</option>
+              <option>Más de $600 M</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label" for="lf-zona">¿En qué zona o barrio?</label>
+          <input class="form-input" id="lf-zona" type="text" placeholder="Ej: Sur de Cali, Unicentro, Ciudad Jardín…" />
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">¿Cómo piensas pagar?</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="pago" value="Crédito hipotecario" />
+              <span>Crédito hipotecario</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="pago" value="Contado" />
+              <span>Contado</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="pago" value="Subsidio" />
+              <span>Subsidio VIS/VIP</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="pago" value="No lo sé aún" />
+              <span>Aún no lo sé</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label" for="lf-obs">¿Algo más que debamos saber?</label>
+          <textarea class="form-input form-input--textarea" id="lf-obs" rows="3"
+            placeholder="Habitaciones mínimas, piso, parqueadero, mascotas, urgencia…"></textarea>
+        </div>
+        <button type="submit" class="btn btn--primary btn--lg btn--block" id="btn-lead-submit">
+          Enviar solicitud
+        </button>
+        <p class="form-disclaimer">
+          Al enviar aceptas que te contactemos por WhatsApp con opciones de inmuebles.
+          Tu información es confidencial.
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-brand" id="footer-brand">Bienes Raíces</p>
+      <p class="footer-copy" id="footer-copy"></p>
+      <nav class="footer-nav" aria-label="Navegación footer">
+        <a href="#catalogo">Catálogo</a>
+        <a href="#calculadora">Calculadora</a>
+        <a href="#consulta">Contacto</a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       BOTÓN FLOTANTE DE WHATSAPP
+  ============================================================ -->
+  <a class="whatsapp-fab" id="whatsapp-fab" href="#" target="_blank" rel="noopener"
+     aria-label="Contactar por WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.553 4.118 1.522 5.853L0 24l6.306-1.498A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.802 9.802 0 01-5.003-1.368l-.358-.214-3.741.888.944-3.634-.235-.374A9.78 9.78 0 012.182 12C2.182 6.578 6.578 2.182 12 2.182S21.818 6.578 21.818 12 17.422 21.818 12 21.818z"/>
+    </svg>
+  </a>
+
+  <!-- ============================================================
+       MODAL MINI — lead desde ficha de detalle
+  ============================================================ -->
+  <div class="mini-modal" id="mini-modal" hidden role="dialog" aria-modal="true" aria-label="Solicitar información">
+    <div class="mini-modal-panel">
+      <button class="mini-modal-close" id="mini-modal-close" aria-label="Cerrar">✕</button>
+      <h3 class="mini-modal-title" id="mini-modal-title">Solicitar información</h3>
+      <form id="mini-lead-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="ml-nombre">Nombre *</label>
+          <input class="form-input" id="ml-nombre" type="text" placeholder="Tu nombre" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ml-wa">WhatsApp *</label>
+          <input class="form-input" id="ml-wa" type="tel" placeholder="300 000 0000" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">¿Tienes crédito?</label>
+          <div class="radio-group radio-group--inline">
+            <label class="radio-option"><input type="radio" name="ml-credito" value="Aprobado" /><span>Aprobado</span></label>
+            <label class="radio-option"><input type="radio" name="ml-credito" value="En trámite" /><span>En trámite</span></label>
+            <label class="radio-option"><input type="radio" name="ml-credito" value="Contado" /><span>Contado</span></label>
+          </div>
+        </div>
+        <button type="submit" class="btn btn--primary btn--block">Enviar y contactar por WhatsApp</button>
+      </form>
+    </div>
+  </div>
+  <div class="modal-overlay" id="mini-modal-overlay"></div>
+
+  <!-- ============================================================
+       SCRIPTS — orden de carga
+       1. config.js ya está en <head> (window.CONFIG disponible)
+       2. utils.js — helpers compartidos
+       3. api.js  — leer Google Sheets
+       4. pixel.js — Meta Pixel
+       5. catalogo.js — tarjetas + filtros
+       6. ficha.js — overlay de detalle
+       7. calculadora.js — hipoteca
+       8. solicitudes.js — requerimientos
+       9. leads.js — formularios de captación
+      10. nav.js  — menú y scroll
+      11. seo.js  — tags dinámicos
+  ============================================================ -->
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/pixel.js"></script>
+  <script src="js/catalogo.js"></script>
+  <script src="js/ficha.js"></script>
+  <script src="js/calculadora.js"></script>
+  <script src="js/solicitudes.js"></script>
+  <script src="js/leads.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/seo.js"></script>
+
+</body>
+</html>

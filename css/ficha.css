@@ -1,0 +1,134 @@
+/**
+ * ficha.css — OVERLAY DE DETALLE DEL INMUEBLE
+ * =============================================
+ * Panel lateral / modal con carrusel Swiper, datos y CTA.
+ */
+
+/* Overlay de fondo */
+.ficha-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,.55);
+  display: flex; justify-content: flex-end;
+  backdrop-filter: blur(3px);
+}
+.ficha-overlay[hidden] { display: none; }
+
+/* Panel lateral */
+.ficha-panel {
+  width: 100%; max-width: 520px; height: 100%;
+  background: var(--color-papel);
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  animation: slideIn var(--transition-base) ease;
+}
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+.ficha-header {
+  padding: var(--gap-sm) var(--gap-md);
+  display: flex; justify-content: flex-end;
+  border-bottom: 1px solid var(--color-linea);
+  position: sticky; top: 0; z-index: 1; background: var(--color-papel);
+}
+.ficha-close {
+  background: var(--color-fondo); border: 1px solid var(--color-linea);
+  border-radius: var(--radius-full); width: 36px; height: 36px;
+  font-size: 16px; display: grid; place-items: center;
+  color: var(--color-suave); cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.ficha-close:hover { background: var(--color-linea); }
+
+/* Swiper */
+.ficha-swiper { width: 100%; aspect-ratio: 16/10; flex-shrink: 0; }
+.ficha-swiper .swiper-slide img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.ficha-swiper .swiper-button-prev,
+.ficha-swiper .swiper-button-next { color: #fff; }
+.ficha-swiper .swiper-pagination-bullet-active { background: var(--color-primario); }
+
+/* Cuerpo */
+.ficha-body { padding: var(--gap-lg); flex: 1; }
+.ficha-barrio { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .08em; color: var(--color-tenue); font-weight: 600; margin-bottom: 4px; }
+.ficha-tipo   { font-size: var(--text-sm); color: var(--color-suave); margin-bottom: 4px; }
+.ficha-precio { font-size: 2rem; font-weight: 800; color: var(--color-tinta); margin-bottom: var(--gap-sm); }
+.ficha-precio-label { font-size: var(--text-sm); color: var(--color-tenue); font-weight: 400; margin-left: 6px; }
+
+/* Specs en grid */
+.ficha-specs {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap-sm); margin: var(--gap-md) 0;
+  padding: var(--gap-md) 0;
+  border-top: 1px solid var(--color-linea);
+  border-bottom: 1px solid var(--color-linea);
+}
+.ficha-spec {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;
+}
+.ficha-spec-icon { font-size: 22px; }
+.ficha-spec-val  { font-size: var(--text-sm); font-weight: 700; color: var(--color-tinta); }
+.ficha-spec-lbl  { font-size: 11px; color: var(--color-tenue); }
+
+/* Descripción */
+.ficha-obs { font-size: var(--text-sm); color: var(--color-suave); line-height: 1.65; margin-bottom: var(--gap-md); }
+
+/* Características chips */
+.ficha-caract { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--gap-lg); }
+.caract-chip {
+  font-size: 12px; padding: 3px 10px; border-radius: var(--radius-full);
+  background: var(--color-fondo); color: var(--color-suave); border: 1px solid var(--color-linea);
+}
+
+/* Similares */
+.ficha-similares { margin-top: var(--gap-lg); }
+.ficha-similares-title { font-size: var(--text-sm); font-weight: 700; color: var(--color-tenue); text-transform: uppercase; letter-spacing: .06em; margin-bottom: var(--gap-sm); }
+.similares-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-sm); }
+.similar-card {
+  border: 1px solid var(--color-linea); border-radius: var(--radius-md); overflow: hidden;
+  cursor: pointer; transition: box-shadow var(--transition-fast);
+}
+.similar-card:hover { box-shadow: var(--shadow-sm); }
+.similar-img { aspect-ratio: 4/3; width: 100%; object-fit: cover; }
+.similar-info { padding: var(--gap-sm); }
+.similar-precio { font-weight: 700; font-size: var(--text-sm); }
+.similar-sub    { font-size: var(--text-xs); color: var(--color-tenue); }
+
+/* Footer fijo */
+.ficha-footer {
+  padding: var(--gap-md);
+  border-top: 1px solid var(--color-linea);
+  display: flex; flex-direction: column; gap: var(--gap-sm);
+  position: sticky; bottom: 0; background: var(--color-papel);
+}
+
+/* Modal mini (lead desde ficha) */
+.mini-modal {
+  position: fixed; inset: 0; z-index: 300;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--gap-md);
+}
+.mini-modal[hidden] { display: none; }
+.mini-modal-panel {
+  background: var(--color-papel); border-radius: var(--radius-xl);
+  padding: var(--gap-xl); width: 100%; max-width: 420px;
+  position: relative; z-index: 1; box-shadow: var(--shadow-xl);
+  animation: popIn var(--transition-base) ease;
+}
+@keyframes popIn { from { transform: scale(.92); opacity:0; } to { transform: scale(1); opacity:1; } }
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 299;
+  background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+}
+.mini-modal-close {
+  position: absolute; top: var(--gap-md); right: var(--gap-md);
+  background: var(--color-fondo); border: 1px solid var(--color-linea);
+  border-radius: var(--radius-full); width: 32px; height: 32px;
+  font-size: 14px; display: grid; place-items: center; cursor: pointer;
+}
+.mini-modal-title { font-size: var(--text-lg); font-weight: 700; margin-bottom: var(--gap-md); }
+
+@media (max-width: 540px) {
+  .ficha-panel { max-width: 100%; border-radius: 0; }
+  .ficha-specs { grid-template-columns: repeat(2, 1fr); }
+}
