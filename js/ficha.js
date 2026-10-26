@@ -9,6 +9,11 @@
 let _swiperInst = null;
 let _inm_actual = null;
 
+/** Construye el slug compartible de un inmueble (?ver=tipo-barrio-id). */
+function _slugInmueble(inm) {
+  return `${normTexto(inm.tipo)}-${normTexto(inm.barrio)}-${inm.id || ''}`.replace(/\s+/g,'-');
+}
+
 /** Abre la ficha de un inmueble. Lo llama catalogo.js al hacer clic en tarjeta. */
 function abrirFicha(inm) {
   _inm_actual = inm;
@@ -19,17 +24,33 @@ function abrirFicha(inm) {
   _renderFicha(inm);
   pixelViewContent(inm);
 
-  // URL compartible
-  const slug = `${normTexto(inm.tipo)}-${normTexto(inm.barrio)}-${inm.id || ''}`.replace(/\s+/g,'-');
-  history.replaceState(null, '', '?ver=' + slug);
+  // Empujamos un estado al historial (en vez de reemplazarlo) para que el
+  // botón "atrás" del navegador/celular cierre el overlay y el usuario
+  // siga explorando el catálogo donde estaba, en vez de salir de la página.
+  history.pushState({ lcFicha: true }, '', '?ver=' + _slugInmueble(inm));
 }
 
 function cerrarFicha() {
+  // Si el overlay se abrió empujando un estado (caso normal), retrocedemos
+  // en el historial; el listener de popstate hace el cierre visual.
+  if (history.state && history.state.lcFicha) {
+    history.back();
+  } else {
+    _cerrarFichaUI();
+  }
+}
+
+function _cerrarFichaUI() {
   document.getElementById('ficha-overlay').hidden = true;
   document.body.style.overflow = '';
-  history.replaceState(null, '', window.location.pathname + (window.location.search.replace(/[?&]ver=[^&]*/,'')));
   if (_swiperInst) { _swiperInst.destroy(true,true); _swiperInst = null; }
 }
+
+// Cuando el usuario usa el botón/gesto "atrás", solo cerramos visualmente
+// (el navegador ya hizo la navegación, no hay que tocar el historial de nuevo).
+window.addEventListener('popstate', (e) => {
+  if (!(e.state && e.state.lcFicha)) _cerrarFichaUI();
+});
 
 function _renderFicha(inm) {
   const precio = parseFloat(inm.precio) || 0;
@@ -65,9 +86,8 @@ function _renderFicha(inm) {
       ${_spec('📐', inm.area, 'Área', 'm²')}
       ${_spec('🛏', inm.habitaciones, 'Habitaciones')}
       ${_spec('🚿', inm.banos, 'Baños')}
-      ${_spec('🚗', inm.parqueadero !== '0' ? inm.parqueadero : '', 'Parqueadero')}
-      ${_spec('🏢', inm.piso, 'Piso')}
-      ${_spec('📅', inm.estado, 'Estado')}
+      ${_spec('🏢', inm.piso, _esCasa(inm.tipo) ? 'Niveles' : 'Piso')}
+      ${_spec('💳', _formaPago(inm.credito), 'Forma de Pago')}
     </div>
 
     ${inm.observaciones ? `<p class="ficha-obs">${escHtml(inm.observaciones)}</p>` : ''}
@@ -79,10 +99,6 @@ function _renderFicha(inm) {
   // CTA
   const btnLead = document.getElementById('btn-ficha-lead');
   btnLead.onclick = () => _abrirMiniLead(inm, precioStr);
-
-  const btnExt = document.getElementById('btn-ficha-ext');
-  if (inm.link) { btnExt.href = inm.link; btnExt.hidden = false; }
-  else { btnExt.hidden = true; }
 
   // Similares (asíncronos para no bloquear)
   setTimeout(() => _renderSimilares(inm), 200);
@@ -97,14 +113,41 @@ function _spec(icon, val, label, unidad = '') {
   </div>`;
 }
 
+/** true si el tipo de inmueble es una casa (el campo "piso" ahí significa niveles). */
+function _esCasa(tipo) {
+  const t = (tipo || '').trim().toLowerCase();
+  return t === 'casa independiente' || t === 'casa en conjunto';
+}
+
+/** Traduce la columna "credito" (SI/NO/POR REVISAR) al texto que ve el visitante. */
+function _formaPago(credito) {
+  const c = (credito || '').trim().toLowerCase();
+  if (!c) return '';
+  if (c === 'si' || c === 'sí') return 'Si aplica crédito';
+  if (c === 'no') return 'Solo al Contado';
+  return 'Por revisar'; // cualquier otro valor, ej. "por revisar"
+}
+
 function _renderSimilares(inm) {
   const contenedor = document.getElementById('ficha-similares');
-  if (!contenedor || !window._inventario) return;
+  if (!contenedor) return;
+
+  // Solo mostramos similares para inmuebles en venta (con precio definido);
+  // el rango de ±20M no aplica a cánones de arriendo.
   const precio = parseFloat(inm.precio) || 0;
-  const similares = window._inventario
-    .filter(i => i !== inm && i.tipo === inm.tipo && Math.abs((parseFloat(i.precio)||0) - precio) < precio * 0.2)
-    .slice(0, 2);
-  if (!similares.length) return;
+  if (!precio || !window._inventario) { contenedor.innerHTML = ''; return; }
+
+  const RANGO = 20000000; // ±20 millones de pesos
+  const candidatos = window._inventario.filter(i =>
+    i !== inm &&
+    i.tipo === inm.tipo &&
+    parseFloat(i.precio) > 0 &&
+    Math.abs((parseFloat(i.precio) || 0) - precio) <= RANGO
+  );
+  if (!candidatos.length) { contenedor.innerHTML = ''; return; }
+
+  // Dos al azar entre los candidatos dentro del rango.
+  const similares = _shuffle([...candidatos]).slice(0, 2);
   contenedor.innerHTML = `
     <p class="ficha-similares-title">Inmuebles similares</p>
     <div class="similares-row">
@@ -154,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const wa      = document.getElementById('ml-wa').value.trim();
     const credito = document.querySelector('input[name="ml-credito"]:checked')?.value || '';
 
-    if (!nombre || !wa) { toast('Completa nombre y WhatsApp', 'warn'); return; }
+    if (!nombre || !wa || !credito) { toast('Completa nombre, WhatsApp y forma de pago', 'warn'); return; }
 
     const btn = e.target.querySelector('button[type=submit]');
     btn.disabled = true; btn.textContent = 'Enviando…';
@@ -164,8 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
     pixelLead('ficha');
     _cerrarMiniLead();
 
-    // Abrir WhatsApp
-    const msg = `Hola, me interesa el ${inm.tipo} en ${inm.barrio}. Vi su catálogo y quisiera más información.`;
+    // Abrir WhatsApp con nombre, forma de pago y link directo al inmueble
+    const link = (window.CONFIG.BASE_URL || (window.location.origin + window.location.pathname)) + '?ver=' + _slugInmueble(inm);
+    const msg  = `Hola, soy ${nombre}. Me interesa el ${inm.tipo} en ${inm.barrio}. Forma de pago: ${credito}. Enlace: ${link}`;
     window.open(waUrl(window.CONFIG.WHATSAPP_NUMBER, msg), '_blank');
 
     toast(res.ok ? '¡Mensaje enviado! Te contactaremos pronto.' : 'Enviado. Abriendo WhatsApp…', 'ok');
