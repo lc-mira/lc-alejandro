@@ -77,7 +77,7 @@ function _inyectarMarca() {
   } else {
     const iniciales = C.MARCA_NOMBRE.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
     logoMon.textContent = iniciales;
-    document.getElementById('agente-avatar').textContent = iniciales;
+    document.getElementById('about-avatar').textContent = iniciales;
     document.getElementById('logo-monogram').hidden = false;
   }
 
@@ -200,14 +200,14 @@ function aplicarFiltros() {
     if (tipo   && !inm.tipo?.includes(tipo))                    return false;
     if (barrio && normTexto(inm.barrio) !== normTexto(barrio))  return false;
     if (negocio && !inm.servicio?.includes(negocio))            return false;
-    const p = parseFloat(inm.precio) || 0;
+    const p = parseMoneda(inm.precio);
     if (p && (p < precMin || p > precMax))                      return false;
     if (hab && (parseInt(inm.habitaciones) || 0) < hab)         return false;
     return true;
   });
 
-  if (orden === 'precio-asc')  _filtrados.sort((a,b) => (parseFloat(a.precio)||0) - (parseFloat(b.precio)||0));
-  if (orden === 'precio-desc') _filtrados.sort((a,b) => (parseFloat(b.precio)||0) - (parseFloat(a.precio)||0));
+  if (orden === 'precio-asc')  _filtrados.sort((a,b) => parseMoneda(a.precio) - parseMoneda(b.precio));
+  if (orden === 'precio-desc') _filtrados.sort((a,b) => parseMoneda(b.precio) - parseMoneda(a.precio));
   if (orden === 'area-desc')   _filtrados.sort((a,b) => (parseFloat(b.area)||0)   - (parseFloat(a.area)||0));
 
   // Actualizar badge de filtros activos
@@ -279,10 +279,12 @@ function _renderTarjetas(reset) {
 }
 
 function _crearTarjeta(inm) {
-  const precio  = parseFloat(inm.precio) || 0;
-  const canon   = parseFloat(inm.canon)  || 0;
+  const precio  = parseMoneda(inm.precio);
+  const canon   = parseMoneda(inm.canon);
   const precioStr = precio ? formatPrecio(precio) : (canon ? formatPrecio(canon) + '/mes' : 'Consultar');
-  const label     = precio && canon ? 'Venta y Arriendo' : precio ? 'Venta' : 'Arriendo';
+  // El servicio real viene directo de la columna "servicio" de la hoja.
+  // Solo si llegara vacío, se adivina a partir de si hay precio y/o canon.
+  const label     = (inm.servicio && inm.servicio.trim()) || (precio && canon ? 'Venta y Arriendo' : precio ? 'Venta' : 'Arriendo');
   const fotos     = (inm.fotos || '').split(',').map(f => f.trim()).filter(Boolean);
 
   const card = document.createElement('article');
@@ -291,8 +293,8 @@ function _crearTarjeta(inm) {
   card.setAttribute('tabindex', '0');
   card.setAttribute('aria-label', `${inm.tipo} en ${inm.barrio} — ${precioStr}`);
 
-  const imgHtml = inm.imagen
-    ? `<img class="card-img" src="${escHtml(inm.imagen)}" alt="${escHtml(inm.tipo)} en ${escHtml(inm.barrio)}" loading="lazy" />`
+  const imgHtml = inm._img
+    ? `<img class="card-img" src="${escHtml(inm._img)}" alt="${escHtml(inm.tipo)} en ${escHtml(inm.barrio)}" loading="lazy" />`
     : `<div class="card-no-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg><span>Sin imagen</span></div>`;
 
   card.innerHTML = `
@@ -302,10 +304,6 @@ function _crearTarjeta(inm) {
         <span class="badge badge--servicio">${escHtml(label)}</span>
         ${inm.credito && /sí|si|aplica/i.test(inm.credito) ? '<span class="badge badge--credito">✓ Crédito</span>' : ''}
       </div>
-      ${window.CONFIG.WHATSAPP_NUMBER ? `
-      <button class="card-wa-btn" aria-label="Contactar por WhatsApp" data-wa="${escHtml(inm.tipo)} en ${escHtml(inm.barrio)}">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.553 4.118 1.522 5.853L0 24l6.306-1.498A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.802 9.802 0 01-5.003-1.368l-.358-.214-3.741.888.944-3.634-.235-.374A9.78 9.78 0 012.182 12C2.182 6.578 6.578 2.182 12 2.182S21.818 6.578 21.818 12 17.422 21.818 12 21.818z"/></svg>
-      </button>` : ''}
     </div>
     <div class="card-body">
       <p class="card-barrio">${escHtml(inm.barrio || inm.zona || '')}</p>
@@ -322,20 +320,8 @@ function _crearTarjeta(inm) {
     </div>`;
 
   // Eventos
-  card.addEventListener('click', (e) => {
-    if (e.target.closest('.card-wa-btn')) return;
-    abrirFicha(inm);
-  });
+  card.addEventListener('click', () => abrirFicha(inm));
   card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirFicha(inm); } });
-
-  const waBtn = card.querySelector('.card-wa-btn');
-  if (waBtn) {
-    waBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      pixelContact();
-      window.open(waUrl(window.CONFIG.WHATSAPP_NUMBER, `Hola, vi un ${inm.tipo} en ${inm.barrio} a ${precioStr} en su catálogo y me gustaría información.`), '_blank');
-    });
-  }
 
   return card;
 }
