@@ -70,7 +70,7 @@ const CONFIG = {
    * Durante pruebas: 'https://otayajavier.github.io/lc-alejandro'
    * Con dominio propio: 'https://catalogo.alejandrocadena.co'
    * ---------------------------------------------------------- */
-  BASE_URL: 'https://otayajavier.github.io/lc-alejandro',
+  BASE_URL: 'https://lc-mira.github.io/lc-alejandro',
 };
 
 window.CONFIG = CONFIG;
