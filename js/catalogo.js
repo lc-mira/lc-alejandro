@@ -77,7 +77,7 @@ function _inyectarMarca() {
   } else {
     const iniciales = C.MARCA_NOMBRE.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
     logoMon.textContent = iniciales;
-    document.getElementById('about-avatar').textContent = iniciales;
+    document.getElementById('agente-avatar').textContent = iniciales;
     document.getElementById('logo-monogram').hidden = false;
   }
 
