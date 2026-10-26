@@ -87,6 +87,7 @@ function _renderFicha(inm) {
       ${_spec('📐', inm.area, 'Área', 'm²')}
       ${_spec('🛏', inm.habitaciones, 'Habitaciones')}
       ${_spec('🚿', inm.banos, 'Baños')}
+      ${_spec('🚗', inm.parqueadero !== '0' ? inm.parqueadero : '', 'Parqueadero')}
       ${_spec('🏢', inm.piso, _esCasa(inm.tipo) ? 'Niveles' : 'Piso')}
       ${_spec('💳', _formaPago(inm.credito), 'Forma de Pago')}
     </div>
