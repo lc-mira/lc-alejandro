@@ -58,21 +58,22 @@ function _renderFicha(inm) {
   const precioStr = precio ? formatPrecio(precio) : (canon ? formatPrecio(canon) : 'Consultar');
   const label     = precio && canon ? '/mes arriendo' : precio ? '' : '/mes';
 
-  // Carrusel
-  const fotos = [inm._img, ...(inm.fotos || '').split(',').map(f=>f.trim()).filter(Boolean)]
-    .filter((f,i,a) => f && a.indexOf(f)===i); // únicas
+  // Carrusel — usa TODAS las fotos ya separadas por api.js (admite tanto
+  // saltos de línea como comas en la columna "Fotos" de la hoja).
+  const fotos = (inm._fotos && inm._fotos.length) ? inm._fotos : (inm._img ? [inm._img] : []);
   const slidesEl = document.getElementById('swiper-slides');
   slidesEl.innerHTML = fotos.length
-    ? fotos.map(f => `<div class="swiper-slide"><img src="${escHtml(f)}" alt="${escHtml(inm.tipo)} en ${escHtml(inm.barrio)}" loading="lazy" style="width:100%;height:100%;object-fit:cover"/></div>`).join('')
+    ? fotos.map(f => `<div class="swiper-slide"><div class="swiper-zoom-container"><img src="${escHtml(f)}" alt="${escHtml(inm.tipo)} en ${escHtml(inm.barrio)}" loading="lazy" style="width:100%;height:100%;object-fit:cover"/></div></div>`).join('')
     : `<div class="swiper-slide" style="display:flex;align-items:center;justify-content:center;background:var(--color-fondo);min-height:240px"><span style="color:var(--color-tenue)">Sin fotos</span></div>`;
 
   if (_swiperInst) { _swiperInst.destroy(true,true); }
-  if (window.Swiper && fotos.length > 1) {
+  if (window.Swiper && fotos.length) {
     _swiperInst = new Swiper('#ficha-swiper', {
       pagination: { el: '.swiper-pagination', clickable: true },
       navigation: { prevEl: '.swiper-button-prev', nextEl: '.swiper-button-next' },
       loop: fotos.length > 2,
       lazy: true,
+      zoom: { maxRatio: 3 }, // doble-tap o pellizco para ampliar cada foto
     });
   }
 
@@ -91,8 +92,6 @@ function _renderFicha(inm) {
     </div>
 
     ${inm.observaciones ? `<p class="ficha-obs">${escHtml(inm.observaciones)}</p>` : ''}
-
-    ${inm.captacion ? `<div class="ficha-caract"><span class="caract-chip">🏗 ${escHtml(inm.captacion)}</span></div>` : ''}
 
     <div id="ficha-similares"></div>`;
 
