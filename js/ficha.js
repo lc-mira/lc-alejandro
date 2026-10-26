@@ -53,13 +53,13 @@ window.addEventListener('popstate', (e) => {
 });
 
 function _renderFicha(inm) {
-  const precio = parseFloat(inm.precio) || 0;
-  const canon  = parseFloat(inm.canon)  || 0;
+  const precio = parseMoneda(inm.precio);
+  const canon  = parseMoneda(inm.canon);
   const precioStr = precio ? formatPrecio(precio) : (canon ? formatPrecio(canon) : 'Consultar');
   const label     = precio && canon ? '/mes arriendo' : precio ? '' : '/mes';
 
   // Carrusel
-  const fotos = [inm.imagen, ...(inm.fotos || '').split(',').map(f=>f.trim()).filter(Boolean)]
+  const fotos = [inm._img, ...(inm.fotos || '').split(',').map(f=>f.trim()).filter(Boolean)]
     .filter((f,i,a) => f && a.indexOf(f)===i); // únicas
   const slidesEl = document.getElementById('swiper-slides');
   slidesEl.innerHTML = fotos.length
@@ -134,15 +134,15 @@ function _renderSimilares(inm) {
 
   // Solo mostramos similares para inmuebles en venta (con precio definido);
   // el rango de ±20M no aplica a cánones de arriendo.
-  const precio = parseFloat(inm.precio) || 0;
+  const precio = parseMoneda(inm.precio);
   if (!precio || !window._inventario) { contenedor.innerHTML = ''; return; }
 
   const RANGO = 20000000; // ±20 millones de pesos
   const candidatos = window._inventario.filter(i =>
     i !== inm &&
     i.tipo === inm.tipo &&
-    parseFloat(i.precio) > 0 &&
-    Math.abs((parseFloat(i.precio) || 0) - precio) <= RANGO
+    parseMoneda(i.precio) > 0 &&
+    Math.abs(parseMoneda(i.precio) - precio) <= RANGO
   );
   if (!candidatos.length) { contenedor.innerHTML = ''; return; }
 
@@ -153,9 +153,9 @@ function _renderSimilares(inm) {
     <div class="similares-row">
       ${similares.map(s => `
         <div class="similar-card" onclick="abrirFicha(${escHtml(JSON.stringify(s))})">
-          ${s.imagen ? `<img class="similar-img" src="${escHtml(s.imagen)}" alt="${escHtml(s.tipo)}" loading="lazy" />` : ''}
+          ${s._img ? `<img class="similar-img" src="${escHtml(s._img)}" alt="${escHtml(s.tipo)}" loading="lazy" />` : ''}
           <div class="similar-info">
-            <p class="similar-precio">${formatPrecio(parseFloat(s.precio)||0)}</p>
+            <p class="similar-precio">${formatPrecio(parseMoneda(s.precio))}</p>
             <p class="similar-sub">${escHtml(s.tipo)} · ${escHtml(s.barrio)}</p>
           </div>
         </div>`).join('')}
@@ -257,7 +257,7 @@ function abrirFichaPorUrl() {
  * Esto hace que el link compartido muestre la foto y precio correctos.
  */
 function _actualizarOgInmueble(inm) {
-  const precio = parseFloat(inm.precio) || parseFloat(inm.canon) || 0;
+  const precio = parseMoneda(inm.precio) || parseMoneda(inm.canon);
   const precioStr = precio ? formatPrecio(precio) : '';
   const titulo  = `${inm.tipo} en ${inm.barrio}${precioStr ? ' — ' + precioStr : ''} | ${window.CONFIG.MARCA_NOMBRE}`;
   const desc    = inm.observaciones || `${inm.tipo} en ${inm.barrio}. ${inm.area ? inm.area + 'm². ' : ''}${inm.habitaciones ? inm.habitaciones + ' hab. ' : ''}${window.CONFIG.CIUDAD}.`;
