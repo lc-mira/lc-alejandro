@@ -44,7 +44,7 @@ function pixelViewContent(inm) {
     content_name:     inm.tipo + ' en ' + inm.barrio,
     content_category: inm.tipo,
     content_ids:      [inm.id || inm.link],
-    value:            parseFloat(String(inm.precio).replace(/[^0-9.]/g, '')) || 0,
+    value:            parseMoneda(inm.precio),
     currency:         'COP',
   });
 }
