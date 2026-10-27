@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Limpiar errores previos
     form.querySelectorAll('.has-error').forEach(el => el.classList.remove('has-error'));
 
     const nombre = document.getElementById('lf-nombre').value.trim();
@@ -25,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const pago   = document.querySelector('input[name="pago"]:checked')?.value || '';
     const obs    = document.getElementById('lf-obs').value.trim();
 
-    // Validación básica
     let valid = true;
     if (!nombre) { _marcarError('lf-nombre', 'El nombre es obligatorio'); valid = false; }
     if (!wa || !/\d{7,}/.test(wa.replace(/\D/g,''))) { _marcarError('lf-wa', 'Ingresa un número válido'); valid = false; }
@@ -36,12 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const res = await enviarLead({ nombre, whatsapp: limpiarTel(wa), tipo, presupuesto: presup, zona, forma_pago: pago, observaciones: obs }, 'consulta');
 
-    pixelLead('consulta');
+    pixelLead('consulta', res.eventId);
 
     if (res.ok) {
       form.reset();
       toast('¡Solicitud enviada! Te contactaremos pronto 🎉', 'ok');
-      // Abrir WhatsApp con resumen
       const msg = `Hola, completé el formulario del catálogo. Busco: ${tipo||'inmueble'} en ${zona||'la ciudad'}, presupuesto: ${presup||'a consultar'}. Forma de pago: ${pago||'por definir'}.`;
       setTimeout(() => window.open(waUrl(window.CONFIG.WHATSAPP_NUMBER, msg), '_blank'), 800);
     } else {
