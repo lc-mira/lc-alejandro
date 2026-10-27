@@ -8,6 +8,7 @@
  *  - PageView      → al cargar la página (automático por el código base)
  *  - ViewContent   → al abrir la ficha de un inmueble
  *  - Lead          → al enviar cualquier formulario de captación
+ *                    (con el mismo eventID que el servidor → Meta no lo cuenta doble)
  *  - Contact       → al hacer clic en WhatsApp (flotante o de ficha)
  *  - InitiateCheckout → al abrir la calculadora de crédito
  */
@@ -18,7 +19,7 @@
   const id = window.CONFIG && window.CONFIG.META_PIXEL_ID;
   if (!id) return; // sin píxel configurado → no hacer nada
 
-  // Inyectar el código base de Meta Pixel (snippet oficial)
+  // Código base oficial de Meta Pixel
   !function(f,b,e,v,n,t,s){
     if(f.fbq)return;n=f.fbq=function(){n.callMethod?
     n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -51,24 +52,23 @@ function pixelViewContent(inm) {
 
 /**
  * Dispara Lead cuando se envía un formulario de captación.
- * @param {string} origen — descripción corta del formulario
+ * @param {string} origen  — descripción corta del formulario
+ * @param {string} eventId — el que devolvió enviarLead(); el servidor manda
+ *                           el mismo a la API de Conversiones y Meta deduplica.
  */
-function pixelLead(origen) {
+function pixelLead(origen, eventId) {
   if (!window.fbq) return;
-  fbq('track', 'Lead', { content_name: origen });
+  if (eventId) fbq('track', 'Lead', { content_name: origen }, { eventID: eventId });
+  else         fbq('track', 'Lead', { content_name: origen });
 }
 
-/**
- * Dispara Contact cuando el usuario hace clic en WhatsApp.
- */
+/** Dispara Contact cuando el usuario hace clic en WhatsApp. */
 function pixelContact() {
   if (!window.fbq) return;
   fbq('track', 'Contact');
 }
 
-/**
- * Dispara InitiateCheckout al abrir la calculadora.
- */
+/** Dispara InitiateCheckout al abrir la calculadora. */
 function pixelCalculadora() {
   if (!window.fbq) return;
   fbq('track', 'InitiateCheckout', { content_name: 'Calculadora de crédito' });
