@@ -9,16 +9,44 @@
 'use strict';
 
 /* =============================================================
+ * 0. DATOS DE ATRIBUCIÓN DE META (se capturan al cargar)
+ * El parámetro fbclid se pierde de la URL al abrir una ficha (?ver=),
+ * así que se guarda apenas carga la página.
+ * ============================================================= */
+(function guardarFbclid() {
+  try {
+    const fbclid = new URLSearchParams(window.location.search).get('fbclid');
+    if (fbclid) sessionStorage.setItem('lc_fbc', `fb.1.${Date.now()}.${fbclid}`);
+  } catch (e) { /* modo privado: no pasa nada */ }
+})();
+
+function _cookie(nombre) {
+  const m = document.cookie.match(new RegExp('(?:^|; )' + nombre + '=([^;]*)'));
+  return m ? decodeURIComponent(m[1]) : '';
+}
+
+function _fbc() {
+  let guardado = '';
+  try { guardado = sessionStorage.getItem('lc_fbc') || ''; } catch (e) {}
+  return _cookie('_fbc') || guardado;
+}
+
+/** ID único del evento: el mismo va al Pixel y al servidor, así Meta no cuenta doble. */
+function _nuevoEventId() {
+  if (window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  return 'ev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+}
+
+/* =============================================================
  * 1. LEER EL INVENTARIO DESDE GOOGLE SHEETS (hoja pública)
  * ============================================================= */
 
 let _cacheInventario = null;
 let _cacheTimestamp  = 0;
-const CACHE_TTL_MS   = 60_000; // 1 minuto — igual que el espejo
+const CACHE_TTL_MS   = 60_000; // 1 minuto
 
 /**
  * Devuelve el inventario completo como array de objetos.
- * Usa cache en memoria para no re-llamar dentro del mismo minuto.
  * @returns {Promise<Object[]>}
  */
 async function cargarInventario() {
@@ -29,7 +57,6 @@ async function cargarInventario() {
 
   const { SPREADSHEET_ID, API_KEY } = window.CONFIG;
 
-  // Validar config antes de llamar
   if (!SPREADSHEET_ID || SPREADSHEET_ID.startsWith('PENDIENTE')) {
     throw new Error('config.js: SPREADSHEET_ID no está configurado. Completa la instalación.');
   }
@@ -47,15 +74,14 @@ async function cargarInventario() {
     throw new Error('Sin conexión a internet o la API de Google no responde.');
   }
 
-  // Errores conocidos de la API de Google Sheets
   if (resp.status === 400) throw new Error('API Key inválida o mal configurada en config.js.');
   if (resp.status === 403) throw new Error('API Key sin permisos o no restringida correctamente. Revisa Google Cloud Console.');
   if (resp.status === 404) throw new Error('SPREADSHEET_ID incorrecto o la hoja no es pública. Verifica que Espejo.gs haya corrido.');
+  if (resp.status === 429) throw new Error('Mucho tráfico en este momento. Recarga en un minuto.');
   if (!resp.ok)            throw new Error(`Error de la API de Google Sheets (${resp.status}). Intenta recargar.`);
 
   const data = await resp.json();
 
-  // Sheet vacío o sin datos
   if (!data.values || data.values.length < 2) {
     _cacheInventario = [];
     _cacheTimestamp  = ahora;
@@ -64,7 +90,6 @@ async function cargarInventario() {
 
   const [cabeceras, ...filas] = data.values;
 
-  // Mapeo de claves: igual que el extractor (por nombre normalizado)
   const MAPA_CLAVES = {
     id: 'id', tipo: 'tipo', proyecto: 'proyecto', barrio: 'barrio',
     precio: 'precio', canon: 'canon', area: 'area',
@@ -75,9 +100,8 @@ async function cargarInventario() {
     fotos: 'fotos', captacion: 'captacion'
   };
 
-  // Alias para columnas cuyo encabezado real NO empieza con el nombre de la
-  // clave (ej. el encabezado es "# Piso" o "Aplica crédito"), así que el
-  // "startsWith" normal nunca las encuentra y el campo queda vacío.
+  // Alias para encabezados que NO empiezan con el nombre de la clave
+  // (ej. "# Piso" o "Aplica crédito").
   const ALIAS_CLAVES = {
     piso: ['# piso'],
     credito: ['aplica credito'],
@@ -107,9 +131,7 @@ async function cargarInventario() {
       Object.keys(keyIdx).forEach(clave => {
         obj[clave] = String(f[keyIdx[clave]] || '').trim();
       });
-      // Primera URL de fotos = imagen principal de la tarjeta
-      const fotosRaw = obj.fotos || '';
-      const fotosArr = fotosRaw.split(/[\n,]+/).map(u => u.trim()).filter(Boolean);
+      const fotosArr = (obj.fotos || '').split(/[\n,]+/).map(u => u.trim()).filter(Boolean);
       obj._img   = fotosArr[0] || '';
       obj._fotos = fotosArr;
       return obj;
@@ -158,22 +180,28 @@ async function cargarRequerimientos() {
 /**
  * @param {Object} datos — campos del formulario
  * @param {string} origen — 'catalogo' | 'consulta' | 'ficha:{id}'
- * @returns {Promise<{ok: boolean, mensaje: string}>}
+ * @returns {Promise<{ok: boolean, mensaje: string, eventId: string}>}
+ *          eventId → pásalo a pixelLead() para que Meta no cuente el lead dos veces.
  */
 async function enviarLead(datos, origen = 'catalogo') {
   const { SCRIPT_URL, CLIENT_TOKEN } = window.CONFIG;
+  const eventId = _nuevoEventId();
 
   if (!SCRIPT_URL || SCRIPT_URL.startsWith('PENDIENTE')) {
-    return { ok: false, mensaje: 'El servicio no está configurado aún. Contacta al administrador.' };
+    return { ok: false, mensaje: 'El servicio no está configurado aún. Contacta al administrador.', eventId };
   }
 
   const payload = {
-    accion:  'guardarLead',
-    token:   CLIENT_TOKEN,
+    accion:    'guardarLead',
+    token:     CLIENT_TOKEN,
     origen,
     ...datos,
-    pagina:  window.location.href,
-    ts:      new Date().toISOString(),
+    eventId,
+    fbc:       _fbc(),
+    fbp:       _cookie('_fbp'),
+    navegador: navigator.userAgent || '',
+    pagina:    window.location.href,
+    ts:        new Date().toISOString(),
   };
 
   try {
@@ -183,9 +211,9 @@ async function enviarLead(datos, origen = 'catalogo') {
       redirect: 'follow',
     });
     const json = await resp.json();
-    return { ok: json.ok !== false, mensaje: json.mensaje || '' };
+    return { ok: json.ok !== false, mensaje: json.mensaje || json.error || '', eventId: json.eventId || eventId };
   } catch (e) {
     console.error('[api] enviarLead:', e);
-    return { ok: false, mensaje: 'Error de conexión. Intenta de nuevo.' };
+    return { ok: false, mensaje: 'Error de conexión. Intenta de nuevo.', eventId };
   }
 }
