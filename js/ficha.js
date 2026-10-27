@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const res = await enviarLead({ nombre, whatsapp: wa, credito, inmueble: inm.tipo + ' en ' + inm.barrio, precio: inm.precio }, 'ficha:' + (inm.id || ''));
 
-    pixelLead('ficha');
+    pixelLead('ficha', res.eventId);
     _cerrarMiniLead();
 
     // Abrir WhatsApp con nombre, forma de pago y link directo al inmueble
